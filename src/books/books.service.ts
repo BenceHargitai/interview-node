@@ -38,11 +38,15 @@ export class BooksService {
           book.workId,
         );
         if (details?.first_publish_date) {
+          console.log(details.first_publish_date);
           const year = new Date(details.first_publish_date).getFullYear();
+          console.log(year);
           if (year) {
             book.year = year;
             await this.bookRepository.save(book);
           }
+        } else {
+          console.log(`No first publish date found for book: ${book.id}`);
         }
       } catch (error) {
         console.error(`Failed to update book: ${book.id}:`, error.message);
