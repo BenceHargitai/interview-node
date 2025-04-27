@@ -27,4 +27,7 @@ export class Book extends BaseEntity {
 
   @OneToMany(() => Rental, (rental) => rental.book)
   rentals: Rental[];
+
+  @Column({ nullable: true })
+  year: number;
 }
