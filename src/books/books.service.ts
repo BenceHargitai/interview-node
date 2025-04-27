@@ -28,4 +28,25 @@ export class BooksService {
 
     return book;
   }
+
+  async updateAllWithYear(): Promise<void> {
+    const books = await this.bookRepository.find();
+
+    for (const book of books) {
+      try {
+        const details = await this.openLibraryClientService.getBookDetails(
+          book.workId,
+        );
+        if (details?.first_publish_date) {
+          const year = new Date(details.first_publish_date).getFullYear();
+          if (year) {
+            book.year = year;
+            await this.bookRepository.save(book);
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to update book: ${book.id}:`, error.message);
+      }
+    }
+  }
 }
