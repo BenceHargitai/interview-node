@@ -29,28 +29,48 @@ export class BooksService {
     return book;
   }
 
-  async updateAllWithYear(): Promise<void> {
+  async updateAllWithYear(): Promise<{ updatedCount:number, errorCount:number, errors: string[] }> {
     const books = await this.bookRepository.find();
+    let updatedCount = 0;
+    let errorCount = 0;
+    const errors: string[] = [];
 
     for (const book of books) {
       try {
+        if (!book.workId) {
+          console.log(`No workId found for book: ${book.id}`);
+          errors.push(`No workId found for book: ${book.id}`);
+          continue;
+        }
         const details = await this.openLibraryClientService.getBookDetails(
           book.workId,
         );
         if (details?.first_publish_date) {
-          console.log(details.first_publish_date);
           const year = new Date(details.first_publish_date).getFullYear();
-          console.log(year);
-          if (year) {
+          if (year && !isNaN(year)) {
             book.year = year;
             await this.bookRepository.save(book);
+            updatedCount++;
+          } else {
+            console.log(`Invalid year for book: ${book.id}`);
+            errors.push(`Invalid year for book: ${book.id}`);
+            errorCount++;
           }
         } else {
           console.log(`No first publish date found for book: ${book.id}`);
+          errors.push(`No first publish date found for book: ${book.id}`);
+          errorCount++;
         }
       } catch (error) {
         console.error(`Failed to update book: ${book.id}:`, error.message);
+        errors.push(`Failed to update book: ${book.id}: ${error.message}`);
+        errorCount++;
       }
     }
+    return {
+      updatedCount,
+      errorCount,
+      errors,
+    };
   }
 }

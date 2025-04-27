@@ -17,7 +17,11 @@ export class BooksController {
   }
 
   @Patch('update-all-with-year')
-  async updateAllWithYear(): Promise<void> {
-    await this.booksService.updateAllWithYear();
+  async updateAllWithYear(): Promise<{
+    updatedCount: number;
+    errorCount: number;
+    errors: string[];
+  }> {
+    return this.booksService.updateAllWithYear();
   }
 }
